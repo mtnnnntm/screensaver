@@ -1,5 +1,5 @@
 {
-  "activeImage": "moon",
+  "activeImage": "cat",
   "images": {
     "moon": {
       "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/moooon.jpg",
@@ -15,7 +15,7 @@
       "rows": 3,
       "cols": 1,
       "assignments": {
-        "REPLACE-WITH-UUID-A": 0,
+        "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
         "REPLACE-WITH-UUID-B": 1,
         "REPLACE-WITH-UUID-C": 2
       }

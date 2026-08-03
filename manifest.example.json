@@ -2,7 +2,7 @@
   "activeImage": "moon",
   "images": {
     "moon": {
-      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/blob/main/moooon.jpg",
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/moooon.jpg",
       "rows": 1,
       "cols": 2,
       "assignments": {
@@ -11,7 +11,7 @@
       }
     },
     "cat": {
-      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/blob/main/caaat.jpg",
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/caaat.jpg",
       "rows": 3,
       "cols": 1,
       "assignments": {

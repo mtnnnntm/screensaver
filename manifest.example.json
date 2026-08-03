@@ -1,0 +1,30 @@
+{
+  "activeImage": "moon",
+  "images": {
+    "moon": {
+      "url": "https://your-host.example.com/moon.png",
+      "rows": 1,
+      "cols": 5,
+      "assignments": {
+        "REPLACE-WITH-UUID-A": 0,
+        "REPLACE-WITH-UUID-B": 1,
+        "REPLACE-WITH-UUID-C": 2,
+        "REPLACE-WITH-UUID-D": 3,
+        "REPLACE-WITH-UUID-E": 4
+      }
+    },
+    "forest": {
+      "url": "https://your-host.example.com/forest.png",
+      "rows": 2,
+      "cols": 3,
+      "assignments": {
+        "REPLACE-WITH-UUID-A": 0,
+        "REPLACE-WITH-UUID-B": 1,
+        "REPLACE-WITH-UUID-C": 2,
+        "REPLACE-WITH-UUID-D": 3,
+        "REPLACE-WITH-UUID-E": 4,
+        "REPLACE-WITH-UUID-F": 5
+      }
+    }
+  }
+}

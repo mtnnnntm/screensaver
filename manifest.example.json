@@ -7,7 +7,7 @@
       "cols": 2,
       "assignments": {
         "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
-        "REPLACE-WITH-UUID-B": 1
+        "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": 1
       }
     },
     "cat": {
@@ -16,7 +16,7 @@
       "cols": 1,
       "assignments": {
         "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
-        "REPLACE-WITH-UUID-B": 1,
+        "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": 1,
         "REPLACE-WITH-UUID-C": 2
       }
     },
@@ -27,7 +27,7 @@
       "transparent": true,
       "assignments": {
         "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
-        "OTHER-UUID": 1
+        "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": 1
        }
     }
   }

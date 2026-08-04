@@ -1,5 +1,5 @@
 {
-  "activeImage": "moon",
+  "activeImage": "dinosaur",
   "images": {
     "moon": {
       "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/moooon.jpg",
@@ -20,8 +20,8 @@
         "REPLACE-WITH-UUID-C": 2
       }
     },
-    "trails": {
-      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/transparent.png",
+    "dinosaur": {
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/dinosaur.png",
       "rows": 1,
       "cols": 2,
       "transparent": true,

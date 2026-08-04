@@ -19,16 +19,16 @@
         "REPLACE-WITH-UUID-B": 1,
         "REPLACE-WITH-UUID-C": 2
       }
+    },
+    "trails": {
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/transparent.png",
+      "rows": 1,
+      "cols": 2,
+      "transparent": true,
+      "assignments": {
+        "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
+        "OTHER-UUID": 1
+      }
     }
   }
-  "trails": {
-  "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/transparent.png",
-  "rows": 1,
-  "cols": 2,
-  "transparent": true,
-  "assignments": {
-    "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
-    "OTHER-UUID": 1
-  }
-}
 }

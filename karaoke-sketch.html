@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Karaoke — MosaicSaver sketch</title>
+<style>
+    /* Body background stays transparent so the sketch composites over
+       whatever's behind it (the desktop capture, when transparent mode is on). */
+    html, body { margin: 0; padding: 0; overflow: hidden; background: transparent; }
+    canvas { display: block; background: transparent; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+</head>
+<body>
+<script>
+/* -----------------------------------------------------------------
+   EDIT THIS BLOCK to change the song.
+   Each line is [timeInSeconds, "lyric"]. Empty strings hide the display.
+   ----------------------------------------------------------------- */
+const SONG = {
+    lines: [
+        [ 0.0, "" ],
+        [ 1.0, "媽媽我愛您" ],
+        [ 5.0, "若無講恐驚無機會" ],
+        [10.0, "" ],
+    ],
+
+    // null = starts on load. ISO UTC ("2026-01-15T20:30:00Z") = scheduled start.
+    startTime: null,
+    loop: true,
+};
+
+// Two color states — each side of the sweep line uses one pair.
+const UNSUNG_OUTLINE = [  0,   0,   0];   // black outline before sweep
+const UNSUNG_FILL    = [255, 255, 255];   // white fill before sweep
+
+const SUNG_OUTLINE   = [255, 255, 255];   // white outline after sweep
+const SUNG_FILL      = [  0,  60, 255];   // electric blue fill after sweep
+
+// Outline thickness as a fraction of font size.
+const OUTLINE_RATIO = 0.08;
+
+/* --------------------------------------------------------------- */
+
+// If loaded standalone (not in the screensaver iframe), paint a dark
+// backdrop so the black outline is visible during solo testing.
+if (window.self === window.top) {
+    document.documentElement.style.background = '#0a0a0a';
+    document.body.style.background = '#0a0a0a';
+}
+
+const params = new URLSearchParams(location.search);
+const piece = parseInt(params.get('piece')) || 0;
+const cols  = parseInt(params.get('cols'))  || 1;
+const rows  = parseInt(params.get('rows'))  || 1;
+const row   = parseInt(params.get('row'))   || 0;
+const col   = parseInt(params.get('col'))   || 0;
+
+let songStartMillis;
+let songDuration;
+
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+    if (SONG.startTime) {
+        songStartMillis = new Date(SONG.startTime).getTime();
+    } else {
+        songStartMillis = Date.now();
+    }
+    songDuration = SONG.lines[SONG.lines.length - 1][0];
+}
+
+function currentSongTime() {
+    let elapsed = (Date.now() - songStartMillis) / 1000;
+    if (SONG.loop && songDuration > 0) {
+        elapsed = ((elapsed % songDuration) + songDuration) % songDuration;
+    }
+    return elapsed;
+}
+
+function lineAt(t) {
+    for (let i = SONG.lines.length - 1; i >= 0; i--) {
+        if (t >= SONG.lines[i][0]) return i;
+    }
+    return 0;
+}
+
+function drawOutlinedText(txt, cx, cy, strokeW, outlineC, fillC) {
+    noFill();
+    stroke(outlineC[0], outlineC[1], outlineC[2]);
+    strokeWeight(strokeW);
+    text(txt, cx, cy);
+
+    noStroke();
+    fill(fillC[0], fillC[1], fillC[2]);
+    text(txt, cx, cy);
+}
+
+function draw() {
+    // clear() makes the whole canvas fully transparent, so the desktop
+    // (or whatever's behind the iframe) shows through. Unlike background()
+    // which would fill with a solid color.
+    clear();
+
+    const t = currentSongTime();
+    const idx = lineAt(t);
+    const currentText = SONG.lines[idx][1] || "";
+    if (!currentText) return;
+
+    const lineStart = SONG.lines[idx][0];
+    const lineEnd = idx + 1 < SONG.lines.length
+        ? SONG.lines[idx + 1][0]
+        : lineStart + 4;
+    const lineDur = Math.max(0.001, lineEnd - lineStart);
+    const progress = constrain((t - lineStart) / lineDur, 0, 1);
+
+    const fontSize = min(width, height) * 0.13;
+    textSize(fontSize);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    textFont('"PingFang TC", "Heiti TC", "STHeiti", "Microsoft JhengHei", "Noto Sans TC", sans-serif');
+
+    const cx = width / 2;
+    const cy = height * 0.55;
+    const strokeW = fontSize * OUTLINE_RATIO;
+
+    drawingContext.lineJoin = 'round';
+    drawingContext.lineCap  = 'round';
+
+    const tw = textWidth(currentText);
+    const leftEdge = cx - tw / 2;
+    const sweepX = leftEdge + tw * progress;
+
+    // Right of sweep (unsung): black outline + white fill.
+    drawingContext.save();
+    drawingContext.beginPath();
+    drawingContext.rect(sweepX, 0, width - sweepX, height);
+    drawingContext.clip();
+    drawOutlinedText(currentText, cx, cy, strokeW, UNSUNG_OUTLINE, UNSUNG_FILL);
+    drawingContext.restore();
+
+    // Left of sweep (sung): white outline + electric blue fill.
+    drawingContext.save();
+    drawingContext.beginPath();
+    drawingContext.rect(0, 0, sweepX, height);
+    drawingContext.clip();
+    drawOutlinedText(currentText, cx, cy, strokeW, SUNG_OUTLINE, SUNG_FILL);
+    drawingContext.restore();
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
+</script>
+</body>
+</html>

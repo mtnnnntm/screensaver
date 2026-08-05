@@ -1,5 +1,12 @@
 {
   "activeImage": "fireplace",
+
+  "machines": {
+    "95C59F28-3460-57B8-A9FE-E20262B59F2B": "me",
+    "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": "lucie",
+    "A201FD26-82D2-561A-BB66-584CA01C4FB3": "sono"
+  },
+
   "images": {
     "moon": {
       "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/moooon.jpg",

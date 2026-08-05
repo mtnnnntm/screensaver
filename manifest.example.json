@@ -1,5 +1,5 @@
 {
-  "activeImage": "fireplace",
+  "activeImage": "lyrics",
 
   "machines": {
     "95C59F28-3460-57B8-A9FE-E20262B59F2B": "me",
@@ -70,7 +70,7 @@
       "transparent": true,
       "assignments": {
         "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
-        "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": 1
+        "498C9A4E-0721-531D-958C-CDCF9590C53B": 1
       }
     },
     "fireplace": {

@@ -118,7 +118,7 @@ function draw() {
     const H = height * rows;
 
     // Font sized to virtual canvas so text spans meaningfully across pieces.
-    const fontSize = min(W, H) * 0.13;
+    const fontSize = H / 4;
     textSize(fontSize);
     textStyle(BOLD);
     textAlign(CENTER, CENTER);

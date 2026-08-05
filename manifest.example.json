@@ -1,5 +1,5 @@
 {
-  "activeImage": "flock",
+  "activeImage": "fireplace",
 
   "machines": {
     "95C59F28-3460-57B8-A9FE-E20262B59F2B": "me",
@@ -80,7 +80,8 @@
       "cols": 2,
       "assignments": {
       "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
-      "BC150E75-F2AB-5861-8B02-9FA3D3449216": 1
+      "BC150E75-F2AB-5861-8B02-9FA3D3449216": 1,
+      "498C9A4E-0721-531D-958C-CDCF9590C53B": 2,
   }
 }
   }

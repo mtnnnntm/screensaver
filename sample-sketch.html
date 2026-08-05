@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MosaicSaver sample sketch</title>
+<style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #141414; }
+    canvas { display: block; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+</head>
+<body>
+<script>
+// Piece assignment from MosaicSaver.
+// The screensaver appends these URL params when loading this sketch:
+//   ?piece=0&rows=1&cols=2&row=0&col=0
+const params = new URLSearchParams(location.search);
+const piece = parseInt(params.get('piece')) || 0;
+const cols  = parseInt(params.get('cols'))  || 1;
+const rows  = parseInt(params.get('rows'))  || 1;
+const row   = parseInt(params.get('row'))   || 0;
+const col   = parseInt(params.get('col'))   || 0;
+
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+    textFont('monospace');
+}
+
+function draw() {
+    background(20);
+
+    // Draw as if the canvas spans the whole logical composition
+    // (cols * width) × (rows * height), then translate so only our
+    // cell falls on-screen. Every machine does the same math with
+    // different (row, col), and the pieces line up.
+    push();
+    translate(-col * width, -row * height);
+
+    const W = width * cols;
+    const H = height * rows;
+
+    // Grid spanning the whole composition — makes it obvious this is
+    // one image, not separate ones.
+    stroke(50);
+    strokeWeight(1);
+    for (let x = 0; x <= W; x += 80) line(x, 0, x, H);
+    for (let y = 0; y <= H; y += 80) line(0, y, W, y);
+
+    // A ball that moves in a Lissajous curve across the whole canvas,
+    // positioned by wall-clock time. Every machine agrees on the position
+    // to within a few milliseconds (assuming NTP-synced system clocks).
+    const t = Date.now() / 1000;
+    const bx = W / 2 + (W * 0.4) * Math.sin(t * 0.5);
+    const by = H / 2 + (H * 0.4) * Math.cos(t * 0.35);
+
+    noStroke();
+    fill(255, 220, 100);
+    circle(bx, by, 120);
+
+    // A slower second element — a rotating line — to show that multi-part
+    // coordination works.
+    const cx = W / 2, cy = H / 2;
+    stroke(200, 100, 220);
+    strokeWeight(2);
+    const len = min(W, H) * 0.35;
+    const a = t * 0.2;
+    line(
+        cx - Math.cos(a) * len, cy - Math.sin(a) * len,
+        cx + Math.cos(a) * len, cy + Math.sin(a) * len
+    );
+
+    // Debug label per piece.
+    noStroke();
+    fill(120);
+    textSize(14);
+    text(
+        `piece ${piece}   ${cols}×${rows}   (row ${row}, col ${col})`,
+        col * width + 20, row * height + 30
+    );
+
+    pop();
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
+</script>
+</body>
+</html>

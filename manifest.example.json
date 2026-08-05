@@ -1,11 +1,12 @@
 {
-  "activeImage": "giraffe",
+  "activeImage": "cat",
 
   "machines": {
     "95C59F28-3460-57B8-A9FE-E20262B59F2B": "me",
     "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": "lucie",
     "A201FD26-82D2-561A-BB66-584CA01C4FB3": "sono",
-    "BC150E75-F2AB-5861-8B02-9FA3D3449216": "IT1"
+    "BC150E75-F2AB-5861-8B02-9FA3D3449216": "IT1",
+    "498C9A4E-0721-531D-958C-CDCF9590C53B": "IT2"
   },   
 
   "images": {
@@ -20,12 +21,13 @@
     },
     "cat": {
       "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/caaat.jpg",
-      "rows": 3,
+      "rows": 4,
       "cols": 1,
       "assignments": {
         "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
         "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": 1,
-        "A201FD26-82D2-561A-BB66-584CA01C4FB3": 2
+        "A201FD26-82D2-561A-BB66-584CA01C4FB3": 2,
+        "498C9A4E-0721-531D-958C-CDCF9590C53B": 3
       }
     },
     "dinosaur": {

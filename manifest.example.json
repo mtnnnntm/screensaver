@@ -1,5 +1,5 @@
 {
-  "activeImage": "cat",
+  "activeImage": "dinosaur",
   "images": {
     "moon": {
       "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/moooon.jpg",
@@ -23,11 +23,12 @@
     "dinosaur": {
       "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/dinosaur.png",
       "rows": 1,
-      "cols": 2,
+      "cols": 3,
       "transparent": true,
       "assignments": {
         "95C59F28-3460-57B8-A9FE-E20262B59F2B": 0,
-        "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": 1
+        "1C0DFC6A-6CE4-5DDE-869B-337FED51AB6A": 1,
+        "A201FD26-82D2-561A-BB66-584CA01C4FB3": 2
        }
     }
   }

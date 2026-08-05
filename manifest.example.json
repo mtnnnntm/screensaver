@@ -33,7 +33,7 @@
     },
     "flock": {
       "type": "sketch",
-      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/refs/heads/main/sample-sketch.html",
+      "url": "https://mtnnnntm.github.io/screensaver/sample-sketch.html",
       "rows": 1,
       "cols": 5,
       "assignments": {

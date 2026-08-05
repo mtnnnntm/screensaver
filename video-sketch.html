@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Video — MosaicSaver sketch</title>
+<style>
+    html, body {
+        margin: 0; padding: 0; overflow: hidden;
+        background: #000;
+        width: 100vw; height: 100vh;
+    }
+    /*
+      The <video> element is sized to the *virtual canvas* — cols times wider
+      and rows times taller than one screen — and positioned so that only the
+      current piece's cell falls within the viewport. Same trick as the p5
+      sketches, but done with pure CSS.
+    */
+    #video {
+        position: absolute;
+        top: 0; left: 0;
+        object-fit: cover;    /* fill the virtual canvas even if aspect differs */
+        transform-origin: top left;
+    }
+</style>
+</head>
+<body>
+<video id="video" autoplay muted loop playsinline></video>
+<script>
+(function () {
+    const params = new URLSearchParams(location.search);
+
+    // Video source. Set this in the manifest as the entry's `url`.
+    // If you want to hardcode a video and use this page as a fixed sketch,
+    // change the fallback below.
+    const videoURL = params.get('src')
+        || 'https://mtnnnntm.github.io/screensaver/video.mp4';
+
+    const cols = parseInt(params.get('cols'))  || 1;
+    const rows = parseInt(params.get('rows'))  || 1;
+    const row  = parseInt(params.get('row'))   || 0;
+    const col  = parseInt(params.get('col'))   || 0;
+
+    const video = document.getElementById('video');
+
+    function layout() {
+        // Size the video to the virtual canvas.
+        const W = window.innerWidth * cols;
+        const H = window.innerHeight * rows;
+        video.style.width = W + 'px';
+        video.style.height = H + 'px';
+
+        // Shift it so this piece's cell aligns with the viewport.
+        const offsetX = -col * window.innerWidth;
+        const offsetY = -row * window.innerHeight;
+        video.style.left = offsetX + 'px';
+        video.style.top = offsetY + 'px';
+    }
+    window.addEventListener('resize', layout);
+    layout();
+
+    // Set src last so layout is applied before playback starts.
+    video.src = videoURL;
+
+    // On loadedmetadata, snap to the shared playback position so all
+    // machines are on the same frame.
+    video.addEventListener('loadedmetadata', () => {
+        if (!isFinite(video.duration) || video.duration <= 0) return;
+        const now = Date.now() / 1000;
+        // Same auto-sync trick as karaoke — everyone lands on the same
+        // frame independent of when they loaded.
+        video.currentTime = now % video.duration;
+    });
+
+    // Periodically nudge if drift accumulates (uncommon but possible on
+    // long-running loops with tiny clock drift).
+    setInterval(() => {
+        if (!isFinite(video.duration) || video.duration <= 0) return;
+        const expected = (Date.now() / 1000) % video.duration;
+        const drift = Math.abs(video.currentTime - expected);
+        if (drift > 0.5) {
+            video.currentTime = expected;
+        }
+    }, 5000);
+
+    // Autoplay policies: muted autoplay is universally allowed. Kick it
+    // off explicitly in case the browser doesn't do it automatically.
+    video.play().catch(err => {
+        console.warn('autoplay blocked:', err);
+    });
+})();
+</script>
+</body>
+</html>

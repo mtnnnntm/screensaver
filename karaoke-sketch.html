@@ -4,8 +4,6 @@
 <meta charset="utf-8">
 <title>Karaoke — MosaicSaver sketch</title>
 <style>
-    /* Body background stays transparent so the sketch composites over
-       whatever's behind it (the desktop capture, when transparent mode is on). */
     html, body { margin: 0; padding: 0; overflow: hidden; background: transparent; }
     canvas { display: block; background: transparent; }
 </style>
@@ -20,30 +18,26 @@
 const SONG = {
     lines: [
         [ 0.0, "" ],
-        [ 1.0, "媽媽我愛您" ],
-        [ 5.0, "若無講恐驚無機會" ],
+        [ 1.0, "哈哈哈哈哈哈哈哈" ],
+        [ 5.0, "啦啦啦啦啦啦啦啦" ],
         [10.0, "" ],
     ],
 
-    // null = starts on load. ISO UTC ("2026-01-15T20:30:00Z") = scheduled start.
+    // null = auto-sync from Unix epoch (all machines agree without any setup).
+    // ISO UTC string ("2026-01-15T20:30:00Z") = specific reference start time.
     startTime: null,
     loop: true,
 };
 
-// Two color states — each side of the sweep line uses one pair.
-const UNSUNG_OUTLINE = [  0,   0,   0];   // black outline before sweep
-const UNSUNG_FILL    = [255, 255, 255];   // white fill before sweep
+const UNSUNG_OUTLINE = [  0,   0,   0];
+const UNSUNG_FILL    = [255, 255, 255];
+const SUNG_OUTLINE   = [255, 255, 255];
+const SUNG_FILL      = [  0,  60, 255];
 
-const SUNG_OUTLINE   = [255, 255, 255];   // white outline after sweep
-const SUNG_FILL      = [  0,  60, 255];   // electric blue fill after sweep
-
-// Outline thickness as a fraction of font size.
 const OUTLINE_RATIO = 0.08;
 
 /* --------------------------------------------------------------- */
 
-// If loaded standalone (not in the screensaver iframe), paint a dark
-// backdrop so the black outline is visible during solo testing.
 if (window.self === window.top) {
     document.documentElement.style.background = '#0a0a0a';
     document.body.style.background = '#0a0a0a';
@@ -56,23 +50,30 @@ const rows  = parseInt(params.get('rows'))  || 1;
 const row   = parseInt(params.get('row'))   || 0;
 const col   = parseInt(params.get('col'))   || 0;
 
-let songStartMillis;
 let songDuration;
+let originSec;   // wall-clock reference the song is measured against
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    if (SONG.startTime) {
-        songStartMillis = new Date(SONG.startTime).getTime();
-    } else {
-        songStartMillis = Date.now();
-    }
     songDuration = SONG.lines[SONG.lines.length - 1][0];
+
+    // Sync strategy:
+    // - startTime null → origin is Unix epoch (0). Every machine computes
+    //   (Date.now()/1000) % songDuration, so they all agree without any
+    //   coordination or setup. NTP-synced clocks stay within ~50ms.
+    // - startTime set → origin is that specific timestamp. Same math, but
+    //   the "phase" is anchored to a chosen moment.
+    if (SONG.startTime) {
+        originSec = new Date(SONG.startTime).getTime() / 1000;
+    } else {
+        originSec = 0;
+    }
 }
 
 function currentSongTime() {
-    let elapsed = (Date.now() - songStartMillis) / 1000;
+    const elapsed = Date.now() / 1000 - originSec;
     if (SONG.loop && songDuration > 0) {
-        elapsed = ((elapsed % songDuration) + songDuration) % songDuration;
+        return ((elapsed % songDuration) + songDuration) % songDuration;
     }
     return elapsed;
 }
@@ -96,9 +97,6 @@ function drawOutlinedText(txt, cx, cy, strokeW, outlineC, fillC) {
 }
 
 function draw() {
-    // clear() makes the whole canvas fully transparent, so the desktop
-    // (or whatever's behind the iframe) shows through. Unlike background()
-    // which would fill with a solid color.
     clear();
 
     const t = currentSongTime();
@@ -113,18 +111,28 @@ function draw() {
     const lineDur = Math.max(0.001, lineEnd - lineStart);
     const progress = constrain((t - lineStart) / lineDur, 0, 1);
 
-    const fontSize = min(width, height) * 0.13;
+    // Draw as if the canvas is the whole mosaic (cols * width, rows * height),
+    // then translate so only this piece's cell is visible on-screen.
+    // Same trick as sample-sketch.html — this is what "cut into fragments" means.
+    const W = width * cols;
+    const H = height * rows;
+
+    // Font sized to virtual canvas so text spans meaningfully across pieces.
+    const fontSize = min(W, H) * 0.13;
     textSize(fontSize);
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
     textFont('"PingFang TC", "Heiti TC", "STHeiti", "Microsoft JhengHei", "Noto Sans TC", sans-serif');
 
-    const cx = width / 2;
-    const cy = height * 0.55;
+    const cx = W / 2;
+    const cy = H * 0.55;
     const strokeW = fontSize * OUTLINE_RATIO;
 
     drawingContext.lineJoin = 'round';
     drawingContext.lineCap  = 'round';
+
+    push();
+    translate(-col * width, -row * height);
 
     const tw = textWidth(currentText);
     const leftEdge = cx - tw / 2;
@@ -133,7 +141,7 @@ function draw() {
     // Right of sweep (unsung): black outline + white fill.
     drawingContext.save();
     drawingContext.beginPath();
-    drawingContext.rect(sweepX, 0, width - sweepX, height);
+    drawingContext.rect(sweepX, 0, W - sweepX, H);
     drawingContext.clip();
     drawOutlinedText(currentText, cx, cy, strokeW, UNSUNG_OUTLINE, UNSUNG_FILL);
     drawingContext.restore();
@@ -141,10 +149,12 @@ function draw() {
     // Left of sweep (sung): white outline + electric blue fill.
     drawingContext.save();
     drawingContext.beginPath();
-    drawingContext.rect(0, 0, sweepX, height);
+    drawingContext.rect(0, 0, sweepX, H);
     drawingContext.clip();
     drawOutlinedText(currentText, cx, cy, strokeW, SUNG_OUTLINE, SUNG_FILL);
     drawingContext.restore();
+
+    pop();
 }
 
 function windowResized() {

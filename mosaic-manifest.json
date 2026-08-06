@@ -20,6 +20,11 @@
       "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/giraffe.png",
       "layout": "auto"
     },
+      "bliss": {
+      "type": "image",
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/bliss.jpg",
+      "layout": "auto"
+    },
     "karaoke": {
       "type": "sketch",
       "url": "https://mtnnnntm.github.io/screensaver/karaoke-sketch.html",

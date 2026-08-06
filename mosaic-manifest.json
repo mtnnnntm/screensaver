@@ -30,5 +30,10 @@
       "url": "https://mtnnnntm.github.io/screensaver/sample-sketch.html",
       "layout": "auto"
     }
-  }
+  },
+    "fireplace": {
+      "type": "sketch",
+      "url": "https://mtnnnntm.github.io/screensaver/video-sketch.html?src=https://mtnnnntm.github.io/screensaver/fireplace.mp4",
+      "layout": "auto"
+}
 }

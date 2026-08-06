@@ -1,0 +1,34 @@
+{
+  "images": {
+    "moon": {
+      "type": "image",
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/moooon.jpg",
+      "layout": "horizontal"
+    },
+    "cat": {
+      "type": "image",
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/caaat.jpg",
+      "layout": "vertical"
+    },
+    "dinosaur": {
+      "type": "image",
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/dinosaur.png",
+      "layout": "horizontal"
+    },
+    "giraffe": {
+      "type": "image",
+      "url": "https://raw.githubusercontent.com/mtnnnntm/screensaver/main/giraffe.png",
+      "layout": "auto"
+    },
+    "karaoke": {
+      "type": "sketch",
+      "url": "https://mtnnnntm.github.io/screensaver/karaoke-sketch.html",
+      "layout": "horizontal"
+    },
+    "flock": {
+      "type": "sketch",
+      "url": "https://mtnnnntm.github.io/screensaver/sample-sketch.html",
+      "layout": "auto"
+    }
+  }
+}

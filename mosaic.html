@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mosaic — join</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    background: #0a0a0a;
+    color: #eee;
+    font-family: -apple-system, ui-monospace, Menlo, monospace;
+}
+
+/* Landing screen shown before joining */
+#landing {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    gap: 32px; padding: 48px;
+    text-align: center;
+    z-index: 10;
+}
+#landing.hidden { display: none; }
+#landing h1 {
+    font-size: 42px; font-weight: 300;
+    letter-spacing: 0.15em; text-transform: uppercase;
+}
+#landing .count {
+    font-size: 15px; opacity: 0.6;
+    min-height: 22px;
+    letter-spacing: 0.05em;
+}
+#landing button {
+    padding: 18px 44px;
+    font-size: 16px; font-weight: 500;
+    background: #fff; color: #000;
+    border: none; border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: opacity 0.15s;
+}
+#landing button:hover { opacity: 0.85; }
+#landing button:disabled { opacity: 0.35; cursor: not-allowed; }
+#landing .hint {
+    font-size: 12px; opacity: 0.45;
+    max-width: 380px; line-height: 1.6;
+    margin-top: -8px;
+}
+
+/* Rendering surfaces */
+#stage {
+    position: absolute; inset: 0;
+    background-repeat: no-repeat;
+    background-color: #000;
+    display: none;
+    z-index: 1;
+}
+#stage.visible { display: block; }
+#sketch {
+    position: absolute; inset: 0;
+    width: 100vw; height: 100vh;
+    border: 0; background: transparent;
+    display: none;
+    z-index: 1;
+}
+#sketch.visible { display: block; }
+
+/* Status label */
+#status {
+    position: absolute;
+    bottom: 14px; right: 14px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+    background: rgba(0, 0, 0, 0.55);
+    padding: 3px 7px; border-radius: 2px;
+    letter-spacing: 0.05em;
+    z-index: 100;
+    display: none;
+}
+#status.visible { display: block; }
+
+/* Admin panel */
+#admin {
+    position: absolute; inset: 0;
+    padding: 48px;
+    overflow: auto;
+    display: none;
+    flex-direction: column;
+    gap: 28px;
+    z-index: 5;
+}
+#admin.visible { display: flex; }
+#admin h1 {
+    font-size: 20px; font-weight: 400;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    opacity: 0.5;
+}
+#admin .live {
+    padding: 18px 22px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    display: flex; gap: 20px;
+    align-items: center;
+}
+#admin .live .dot {
+    width: 8px; height: 8px;
+    background: #4ADE80; border-radius: 50%;
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+#admin-count { font-size: 15px; }
+#admin-active { opacity: 0.55; font-size: 12px; margin-top: 3px; }
+#admin .section-label {
+    opacity: 0.5; font-size: 11px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 8px;
+}
+#admin .images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+#admin .image-btn {
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    color: #eee;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.12s;
+}
+#admin .image-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+}
+#admin .image-btn.active {
+    background: #fff; color: #000;
+    border-color: #fff;
+}
+#admin .image-btn .type {
+    font-size: 10px; opacity: 0.5;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin-top: 5px;
+}
+
+/* Error overlay */
+#error {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 48px; text-align: center;
+    gap: 14px;
+    z-index: 20;
+}
+#error.visible { display: flex; }
+#error .title { font-size: 20px; opacity: 0.55; }
+#error .detail { opacity: 0.4; font-size: 13px; max-width: 460px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div id="landing">
+    <h1>Mosaic</h1>
+    <p class="count" id="landing-count">connecting…</p>
+    <button id="join-btn" disabled>Join</button>
+    <p class="hint">
+        You'll join a shared picture split across everyone's screens.
+        Close the tab and your piece disappears; the picture re-composes without it.
+    </p>
+</div>
+
+<div id="stage"></div>
+<iframe id="sketch" allow="autoplay" allowtransparency="true"></iframe>
+<div id="status"></div>
+
+<div id="admin">
+    <h1>Mosaic · admin</h1>
+    <div class="live">
+        <div class="dot"></div>
+        <div>
+            <div id="admin-count">0 participants</div>
+            <div id="admin-active">no active image</div>
+        </div>
+    </div>
+    <div>
+        <div class="section-label">Choose what everyone sees</div>
+        <div class="images" id="admin-images"></div>
+    </div>
+</div>
+
+<div id="error">
+    <div class="title">unable to connect</div>
+    <div class="detail" id="error-detail"></div>
+</div>
+
+<script type="module">
+// ==================================================================
+// CONFIG — fill these in before deploying.
+// ==================================================================
+
+const MANIFEST_URL = "https://mtnnnntm.github.io/screensaver/mosaic-manifest.json";
+
+// Get this by creating a Firebase project (see README.md).
+const FIREBASE_CONFIG = {
+    apiKey:      "REPLACE_ME",
+    authDomain:  "REPLACE_ME.firebaseapp.com",
+    databaseURL: "https://REPLACE_ME-default-rtdb.firebaseio.com",
+    projectId:   "REPLACE_ME",
+};
+
+// ==================================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+    getDatabase, ref, push, set, onValue, onDisconnect,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+// URL params — ?admin=1 shows admin panel instead of participant flow.
+const urlParams = new URLSearchParams(window.location.search);
+const isAdmin = urlParams.get('admin') === '1';
+
+// DOM
+const $ = id => document.getElementById(id);
+const el = {
+    landing:      $('landing'),
+    landingCount: $('landing-count'),
+    joinBtn:      $('join-btn'),
+    stage:        $('stage'),
+    sketch:       $('sketch'),
+    status:       $('status'),
+    admin:        $('admin'),
+    adminCount:   $('admin-count'),
+    adminActive:  $('admin-active'),
+    adminImages:  $('admin-images'),
+    error:        $('error'),
+    errorDetail:  $('error-detail'),
+};
+
+// State
+let manifest = null;
+let db = null;
+let myEntryRef = null;
+let myEntryKey = null;
+let participants = {};
+let activeImageName = null;
+let hasJoined = false;
+let currentRenderKey = '';
+let firebaseConnected = false;
+
+// ==================================================================
+// Init
+// ==================================================================
+
+async function init() {
+    // Fetch manifest.
+    try {
+        const url = MANIFEST_URL + (MANIFEST_URL.includes('?') ? '&' : '?')
+                  + '_t=' + Date.now();
+        const resp = await fetch(url, { cache: 'no-store' });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        manifest = await resp.json();
+    } catch (err) {
+        showError('Manifest fetch failed', err.message);
+        return;
+    }
+
+    // Init Firebase.
+    if (FIREBASE_CONFIG.apiKey === 'REPLACE_ME') {
+        showError('Firebase not configured',
+            'Edit FIREBASE_CONFIG at the top of this HTML file with your project values. See README.md.');
+        return;
+    }
+    try {
+        const app = initializeApp(FIREBASE_CONFIG);
+        db = getDatabase(app);
+    } catch (err) {
+        showError('Firebase init failed', err.message);
+        return;
+    }
+
+    // Subscribe.
+    onValue(ref(db, 'mosaic/participants'), (snap) => {
+        participants = snap.val() || {};
+        firebaseConnected = true;
+        onStateChange();
+    }, (err) => {
+        showError('Firebase read failed', err.message);
+    });
+    onValue(ref(db, 'mosaic/state/activeImage'), (snap) => {
+        activeImageName = snap.val();
+        onStateChange();
+    });
+
+    if (isAdmin) {
+        showAdmin();
+    } else {
+        setupJoinFlow();
+    }
+}
+
+function showError(title, detail) {
+    el.landing.classList.add('hidden');
+    el.admin.classList.remove('visible');
+    el.error.classList.add('visible');
+    el.errorDetail.textContent = detail;
+    el.error.querySelector('.title').textContent = title;
+}
+
+// ==================================================================
+// Participant flow
+// ==================================================================
+
+function setupJoinFlow() {
+    // Enable button once Firebase reports state.
+    const enableBtn = () => {
+        if (firebaseConnected) el.joinBtn.disabled = false;
+    };
+    setInterval(enableBtn, 200);
+
+    el.joinBtn.addEventListener('click', async () => {
+        // Fullscreen requires a user gesture — do it here, in the click handler.
+        try {
+            await document.documentElement.requestFullscreen();
+        } catch (err) {
+            console.warn('Fullscreen denied:', err);
+        }
+
+        // Add self to participants.
+        const participantsRef = ref(db, 'mosaic/participants');
+        myEntryRef = push(participantsRef);
+        myEntryKey = myEntryRef.key;
+        await set(myEntryRef, { joinedAt: Date.now() });
+        onDisconnect(myEntryRef).remove();
+
+        hasJoined = true;
+        el.landing.classList.add('hidden');
+        onStateChange();
+    });
+}
+
+// ==================================================================
+// Reactive state
+// ==================================================================
+
+function onStateChange() {
+    const N = Object.keys(participants).length;
+
+    // Landing count.
+    if (!hasJoined && !isAdmin) {
+        el.landingCount.textContent = N === 0
+            ? "you'll be first here"
+            : `${N} ${N === 1 ? 'person is' : 'people are'} here right now`;
+    }
+
+    // Admin panel.
+    if (isAdmin) {
+        el.adminCount.textContent = `${N} participant${N === 1 ? '' : 's'}`;
+        el.adminActive.textContent = activeImageName
+            ? `active: ${activeImageName}`
+            : 'no active image';
+        renderAdminButtons();
+    }
+
+    // Rendered piece.
+    if (hasJoined) {
+        renderMyPiece();
+    }
+}
+
+function renderAdminButtons() {
+    el.adminImages.innerHTML = '';
+    if (!manifest?.images) return;
+
+    for (const [name, entry] of Object.entries(manifest.images)) {
+        const btn = document.createElement('button');
+        btn.className = 'image-btn';
+        if (name === activeImageName) btn.classList.add('active');
+        btn.innerHTML = `
+            <div>${name}</div>
+            <div class="type">${entry.type} · ${entry.layout || 'auto'}</div>
+        `;
+        btn.addEventListener('click', () => {
+            set(ref(db, 'mosaic/state/activeImage'), name);
+        });
+        el.adminImages.appendChild(btn);
+    }
+
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'image-btn';
+    if (!activeImageName) clearBtn.classList.add('active');
+    clearBtn.innerHTML = `
+        <div>none</div>
+        <div class="type">clear active image</div>
+    `;
+    clearBtn.addEventListener('click', () => {
+        set(ref(db, 'mosaic/state/activeImage'), null);
+    });
+    el.adminImages.appendChild(clearBtn);
+}
+
+function showAdmin() {
+    el.landing.classList.add('hidden');
+    el.admin.classList.add('visible');
+}
+
+// ==================================================================
+// Piece rendering
+// ==================================================================
+
+function computeLayout(N, mode) {
+    if (mode === 'horizontal') return { cols: Math.max(1, N), rows: 1 };
+    if (mode === 'vertical')   return { cols: 1, rows: Math.max(1, N) };
+    const cols = Math.max(1, Math.ceil(Math.sqrt(N)));
+    const rows = Math.max(1, Math.ceil(N / cols));
+    return { cols, rows };
+}
+
+function renderMyPiece() {
+    // My place in join order.
+    const ids = Object.keys(participants).sort((a, b) =>
+        (participants[a]?.joinedAt || 0) - (participants[b]?.joinedAt || 0)
+    );
+    const myIndex = ids.indexOf(myEntryKey);
+    const N = ids.length;
+    if (myIndex < 0) return;
+
+    // No active image → gentle waiting screen.
+    if (!activeImageName || !manifest?.images?.[activeImageName]) {
+        hideStage(); hideSketch();
+        el.status.classList.add('visible');
+        el.status.textContent = `waiting for active image · you are ${myIndex + 1} of ${N}`;
+        return;
+    }
+
+    const image = manifest.images[activeImageName];
+    const { cols, rows } = computeLayout(N, image.layout || 'auto');
+    const row = Math.floor(myIndex / cols);
+    const col = myIndex % cols;
+
+    // Dedup — avoid unnecessary DOM churn on every state change.
+    const renderKey = `${activeImageName}|${image.url}|${myIndex}|${cols}x${rows}`;
+    if (renderKey === currentRenderKey) return;
+    currentRenderKey = renderKey;
+
+    el.status.classList.add('visible');
+    el.status.textContent =
+        `${activeImageName} · piece ${myIndex + 1} of ${N} · (${row},${col})`;
+
+    if (image.type === 'sketch') {
+        hideStage();
+        const qs = image.url.includes('?') ? '&' : '?';
+        const sketchURL = image.url + qs
+            + `piece=${myIndex}&rows=${rows}&cols=${cols}&row=${row}&col=${col}`;
+        if (el.sketch.src !== sketchURL) el.sketch.src = sketchURL;
+        el.sketch.classList.add('visible');
+    } else {
+        hideSketch();
+        el.stage.style.backgroundImage = `url('${image.url}')`;
+        el.stage.style.backgroundSize = `${cols * 100}% ${rows * 100}%`;
+        const px = cols > 1 ? (col / (cols - 1)) * 100 : 0;
+        const py = rows > 1 ? (row / (rows - 1)) * 100 : 0;
+        el.stage.style.backgroundPosition = `${px}% ${py}%`;
+        el.stage.classList.add('visible');
+    }
+}
+
+function hideStage() {
+    el.stage.classList.remove('visible');
+    el.stage.style.backgroundImage = '';
+}
+function hideSketch() {
+    if (el.sketch.classList.contains('visible')) {
+        el.sketch.classList.remove('visible');
+        el.sketch.src = 'about:blank';
+    }
+}
+
+init();
+</script>
+</body>
+</html>
